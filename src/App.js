@@ -75,7 +75,7 @@ function App() {
   }
 
   const fetchProducts = async () => {
-    return await fetch('/.netlify/functions/google-sheet-test')
+    return await fetch('/.netlify/functions/google-sheet')
       .then(response => { return response.json() })
   }
 

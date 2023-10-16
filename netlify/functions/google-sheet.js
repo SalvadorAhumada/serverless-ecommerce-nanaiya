@@ -1,15 +1,13 @@
-const apiData = require('../../src/api');
-const { apiKey, spreadsheetId, sheetName, range, version } = apiData;
 const { google } = require('googleapis');
 
 exports.handler = async () => {
 
   try {
-    const sheets = google.sheets({ version, auth: apiKey });
+    const sheets = google.sheets({ version: process.env.VERSION, auth: process.env.API_KEY });
 
     const res = await sheets.spreadsheets.values.get({
-      spreadsheetId,
-      range: `${sheetName}!${range}`,
+      spreadsheetId: process.env.SPREADSHEET_ID,
+      range: `${process.env.SHEET_NAME}!${process.env.RANGE}`,
     });
 
     const products = res.data.values.reduce((accumulator, currentProduct, i) => {
