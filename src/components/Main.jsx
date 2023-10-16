@@ -42,14 +42,11 @@ function Main({ products, addProduct, formatPrice }) {
                             <Typography variant="h5" component="div">
                                 {product.nombre}
                             </Typography>
-                            <Typography sx={{ mb: 1.5 }} color="text.secondary">
+                            <Typography variant="body3">
                                 <b>{formatPrice(product.precio)}</b>
                             </Typography>
-                            <Typography sx={{ mb: 1.5 }} color="text.secondary">
-                                <b>Disponibles:</b> {product.inventario}
-                            </Typography>
                             <Typography variant="body2">
-                                Descripción: {product.descripcion}
+                                {product.descripcion}
                             </Typography>
                         </CardContent>
                         <CardActions style={styles.cardFooter}>

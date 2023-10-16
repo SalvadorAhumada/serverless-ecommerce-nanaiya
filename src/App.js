@@ -1,13 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css';
-import { apiKey, sheetId } from './api';
 import { styled } from '@mui/material/styles';
 import Badge from '@mui/material/Badge';
-import useGoogleSheets from 'use-google-sheets';
 import Navbar from './components/Navbar';
 import Main from './components/Main';
 import Modal from './components/Modal';
-import selectedData from './selectedData.json';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Avatar from '@mui/material/Avatar';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
@@ -22,6 +19,16 @@ const styles = {
     boxShadow: "2px 2px #00000061",
     cursor: "pointer",
     zIndex: "2"
+  },
+  loading: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'fixed',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0
   }
 }
 
@@ -33,7 +40,11 @@ const theme = createTheme({
       color: "#545454"
     },
     body2: {
-      textAlign: 'left'
+      textAlign: 'left',  
+      fontSize: '1.1rem'
+    },
+    body3: {
+      fontSize: '1.3rem'
     }
   },
 });
@@ -51,6 +62,9 @@ function App() {
   const [search, setSearch] = useState('');
   const [car, setCar] = useState(new Map());
   const [open, setOpen] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const formatPrice = (amount) => {
     return (
       parseInt(amount)
@@ -58,11 +72,16 @@ function App() {
       style: 'currency',
       currency: 'MXN'
     });
-
   }
+
+  const fetchProducts = async () => {
+    return await fetch('/.netlify/functions/google-sheet-test')
+      .then(response => { return response.json() })
+  }
+
   const getProducts = () => {
-    if (search === '') return data[1].data;
-    return data[1].data.filter(product => {
+    if (search === '') return products;
+    return products.filter(product => {
       return product['nombre']
         .toLowerCase()
         .includes(
@@ -70,27 +89,25 @@ function App() {
         )
     })
   }
+
   const addToCar = (product) => {
     setCar(new Map(car.set(product.id, JSON.stringify(product))));
   }
-/*   const { data, loading, error } = useGoogleSheets({
-    apiKey,
-    sheetId,
-  }); */
 
-    const loading = false;
-    const data = [
-      '',
-      {
-        data: selectedData
-      }
-    ]
+  useEffect(() => {
+    fetchProducts().then((products) => {
+      setIsLoading(false);
+      setProducts(products)
+    })
+  }, []);
 
   const showCart = car.size !== 0 ? <Avatar onClick={() => setOpen(true)} style={styles.cartCss}>
     <StyledBadge badgeContent={car.size} color="primary">
       <ShoppingCartIcon />
     </StyledBadge></Avatar> : ''
-  const showElements = loading ? 'Cargando...' : <Main formatPrice={formatPrice} products={getProducts()} addProduct={addToCar} />
+
+  const showElements = isLoading ? <div style={styles.loading}><img alt='loading' src={require('./icons/Loading.gif')} width="300px" height="300px" /></div> : <Main formatPrice={formatPrice} products={getProducts()} addProduct={addToCar} />
+
   return (
     <ThemeProvider theme={theme}>
       <div className="App">
@@ -98,9 +115,7 @@ function App() {
           <Navbar setSearch={setSearch} products={car.size} openCart={setOpen} />
         </header>
         {showCart}
-        {
-          showElements
-        }
+        {showElements}
         <Modal formatPrice={formatPrice} open={open} setOpen={setOpen} selectedProducts={car} />
       </div>
     </ThemeProvider>

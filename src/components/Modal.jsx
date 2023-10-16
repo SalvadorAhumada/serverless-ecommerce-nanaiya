@@ -13,6 +13,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
+import CloseIcon from '@mui/icons-material/Close';
 
 const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -28,6 +29,7 @@ export default function AlertDialogSlide({ open, setOpen, selectedProducts, form
         delete firstProduct.descripcion;
         firstProduct = Object.keys(firstProduct);
         firstProduct.unshift('Cantidad');
+        firstProduct.push('Eliminar')
         return firstProduct;
     }
     const formatProducts = () => {
@@ -79,6 +81,9 @@ export default function AlertDialogSlide({ open, setOpen, selectedProducts, form
                                         </TableCell>
                                         <TableCell component="th" scope="row">
                                             {formatPrice(product.precio)}
+                                        </TableCell>
+                                        <TableCell component="th" scope="row" style={{textAlign: 'center', cursor: 'pointer'}}>
+                                            <CloseIcon/>
                                         </TableCell>
                                     </TableRow>
                                 })}
