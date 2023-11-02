@@ -19,26 +19,25 @@ const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export default function AlertDialogSlide({ open, setOpen, selectedProducts, formatPrice }) {
-    const handleClose = () => { setOpen(false); };
-    const getHeaders = () => {
-        let firstProduct = [...selectedProducts][0][1];
-        firstProduct = JSON.parse(firstProduct);
-        delete firstProduct.id;
-        delete firstProduct.inventario;
-        delete firstProduct.descripcion;
-        firstProduct = Object.keys(firstProduct);
-        firstProduct.unshift('Cantidad');
-        firstProduct.push('Eliminar')
-        return firstProduct;
-    }
-    const formatProducts = () => {
-        const products = [...selectedProducts].map(product => {
-            const selectedProduct = JSON.parse(product[1]);
-            selectedProduct.cantidad = 1;
-            return selectedProduct;
+export default function AlertDialogSlide({ getImg, updateProducts, open, setOpen, selectedProducts, formatPrice }) {
+
+    const handleClose = () => {
+        setOpen(false)
+    };
+    const sendMsg = () => {
+        let url = `https://api.whatsapp.com/send?phone=5213111213128&text=buen+dia+me+interesan+los+siguientes+producto%28s%29%3A`;
+        Array.from(selectedProducts.values()).forEach(product => {
+            const { nombre } = JSON.parse(product);
+            url += ` ${nombre},`;
         })
-        return products;
+        window.open(url, '_blank')
+    }
+    const getHeaders = () => {
+        return []
+    }
+    const deleteProduct = ({ id }) => {
+        let newProducts = selectedProducts.filter(product => product.id !== id);
+        updateProducts(newProducts);
     }
     return (
         <div>
@@ -53,7 +52,7 @@ export default function AlertDialogSlide({ open, setOpen, selectedProducts, form
                 <DialogTitle>{"Mi Carrito"}</DialogTitle>
                 <DialogContent>
                     <TableContainer component={Paper}>
-                        {selectedProducts.size !== 0 ? <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                        {selectedProducts.length !== 0 ? <Table sx={{ minWidth: 650 }} aria-label="simple table">
                             <TableHead>
                                 <TableRow>
                                     {getHeaders().map((header, index) => {
@@ -62,19 +61,19 @@ export default function AlertDialogSlide({ open, setOpen, selectedProducts, form
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {formatProducts().map((product, index) => {
+                                {selectedProducts.map((product, index) => {
                                     return <TableRow
                                         key={index}>
                                         <TableCell component="th" scope="row">
-                                            <TextField 
-                                            style={{width: '100px'}} 
-                                            size="small"
-                                            id={`cantidad-${product.id}`}
-                                            defaultValue="1"
-                                            variant="outlined" />
+                                            <TextField
+                                                style={{ width: '100px' }}
+                                                size="small"
+                                                id={`cantidad-${product.id}`}
+                                                defaultValue="1"
+                                                variant="outlined" />
                                         </TableCell>
                                         <TableCell component="th" scope="row">
-                                            <img alt='imagen del producto' src={product.imagen} style={{ width: '100px', margin: '0 auto' }} />
+                                            <img alt='imagen del producto' src={getImg(product.id)} style={{ width: '100px', margin: '0 auto' }} />
                                         </TableCell>
                                         <TableCell component="th" scope="row">
                                             {product.nombre}
@@ -82,8 +81,8 @@ export default function AlertDialogSlide({ open, setOpen, selectedProducts, form
                                         <TableCell component="th" scope="row">
                                             {formatPrice(product.precio)}
                                         </TableCell>
-                                        <TableCell component="th" scope="row" style={{textAlign: 'center', cursor: 'pointer'}}>
-                                            <CloseIcon/>
+                                        <TableCell component="th" scope="row" style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => deleteProduct(product)}>
+                                            <CloseIcon />
                                         </TableCell>
                                     </TableRow>
                                 })}
@@ -93,7 +92,7 @@ export default function AlertDialogSlide({ open, setOpen, selectedProducts, form
                 </DialogContent>
                 <DialogActions>
                     <Button color='warning' onClick={handleClose}>CANCELAR</Button>
-                    <Button onClick={handleClose}>CONTINUAR</Button>
+                    <Button onClick={sendMsg}>CONTINUAR</Button>
                 </DialogActions>
             </Dialog>
         </div>

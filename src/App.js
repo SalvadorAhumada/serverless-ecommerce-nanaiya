@@ -37,11 +37,13 @@ const theme = createTheme({
     fontFamily: 'Manrope',
     h5: {
       fontWeight: "bolder",
-      color: "#545454"
+      color: "white",
+      opacity: 0.5
     },
     body2: {
       textAlign: 'left',  
-      fontSize: '1.1rem'
+      fontSize: '1.1rem',
+      color: "white",
     },
     body3: {
       fontSize: '1.3rem'
@@ -60,7 +62,7 @@ const StyledBadge = styled(Badge)(() => ({
 }));
 function App() {
   const [search, setSearch] = useState('');
-  const [car, setCar] = useState(new Map());
+  const [shoppingCart, setShoppingCart] = useState([]);
   const [open, setOpen] = useState(false);
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -75,7 +77,12 @@ function App() {
   }
 
   const fetchProducts = async () => {
-    return await fetch('/.netlify/functions/google-sheet')
+    let endpoint = '/.netlify/functions/google-sheet';
+    if(process.env.NODE_ENV === 'development') {
+      endpoint = '/.netlify/functions/google-sheet-test';
+    }
+    console.log('fetch:', endpoint);
+    return await fetch(endpoint)
       .then(response => { return response.json() })
   }
 
@@ -91,7 +98,9 @@ function App() {
   }
 
   const addToCar = (product) => {
-    setCar(new Map(car.set(product.id, JSON.stringify(product))));
+    let newCar = shoppingCart;
+    newCar.push(product);
+    setShoppingCart([...newCar]);
   }
 
   useEffect(() => {
@@ -101,22 +110,33 @@ function App() {
     })
   }, []);
 
-  const showCart = car.size !== 0 ? <Avatar onClick={() => setOpen(true)} style={styles.cartCss}>
-    <StyledBadge badgeContent={car.size} color="primary">
+  const imgHandler = (id) => {
+    try {
+        const urlImg = `./img/${id}.png`;
+        const img = require(urlImg);
+        return urlImg;
+    } catch(ex) {
+        console.warn('NOTA: PRODUCTO SIN IMAGEN');
+        return require(`./img/shoping.png`);
+    }
+};
+
+  const showCart = shoppingCart.length !== 0 ? <Avatar onClick={() => setOpen(true)} style={styles.cartCss}>
+    <StyledBadge badgeContent={shoppingCart.length} color="primary">
       <ShoppingCartIcon />
     </StyledBadge></Avatar> : ''
 
-  const showElements = isLoading ? <div style={styles.loading}><img alt='loading' src={require('./icons/Loading.gif')} width="300px" height="300px" /></div> : <Main formatPrice={formatPrice} products={getProducts()} addProduct={addToCar} />
+  const showElements = isLoading ? <div style={styles.loading}><img alt='loading' src={require('./icons/Loading.gif')} width="300px" height="300px" /></div> : <Main getImg={imgHandler} formatPrice={formatPrice} products={getProducts()} addProduct={addToCar} />
 
   return (
     <ThemeProvider theme={theme}>
       <div className="App">
         <header className="App-header">
-          <Navbar setSearch={setSearch} products={car.size} openCart={setOpen} />
+          <Navbar setSearch={setSearch}/>
         </header>
         {showCart}
         {showElements}
-        <Modal formatPrice={formatPrice} open={open} setOpen={setOpen} selectedProducts={car} />
+        <Modal getImg={imgHandler} updateProducts={setShoppingCart} formatPrice={formatPrice} open={open} setOpen={setOpen} selectedProducts={shoppingCart} />
       </div>
     </ThemeProvider>
   );

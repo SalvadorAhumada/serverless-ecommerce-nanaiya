@@ -7,6 +7,7 @@ import IconButton from '@mui/material/IconButton';
 import ShopIcon from '@mui/icons-material/Shop';
 import SearchIcon from '@mui/icons-material/Search';
 import InputBase from '@mui/material/InputBase';
+import { Button } from '@mui/material';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -48,14 +49,21 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-export default function MenuAppBar({ setSearch, openCart }) {
+export default function MenuAppBar({ setSearch }) {
+
+  const pages = ['Contacto', 'Acerca de'];
+
+  const handleCloseNavMenu = () => {
+    console.log('change page')
+  }
+
   const styles = {
-    flexGrow: { flexGrow: 1 },
-    mr: { mr: 2 }
+    mr: { mr: 2 },
+    bg: { background: 'black'}
   }
   return (
     <Box sx={styles.flexGrow}>
-      <AppBar position="static">
+      <AppBar position="fixed" style={styles.bg}>
         <Toolbar>
           <IconButton
             size="large"
@@ -69,9 +77,17 @@ export default function MenuAppBar({ setSearch, openCart }) {
           <Typography variant="h6" component="div" sx={styles.flexGrow}>
             Venture Zone
           </Typography>
-
-          <IconButton aria-label="cart" onClick={()=>openCart(true)}>
-          </IconButton>
+          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+            {pages.map((page) => (
+              <Button
+                key={page}
+                onClick={handleCloseNavMenu}
+                sx={{ my: 2, ml: 3, color: 'white', display: 'block' }}
+              >
+                {page}
+              </Button>
+            ))}
+          </Box>
           <Search>
             <SearchIconWrapper>
               <SearchIcon />
